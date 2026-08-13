@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendario ÚNICO × Project University</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FAFAF8;
+    --paper:#FFFFFF;
+    --ink:#181818;
+    --ink-soft:#63636A;
+    --ink-faint:#9A9A9F;
+    --line:#E6E3DC;
+
+    --unico:#EA4A22;
+    --unico-deep:#B5330F;
+    --unico-tint:#FFF1EB;
+    --unico-tint2:#FFE3D6;
+
+    --project:#262E54;
+    --project-deep:#131730;
+    --project-tint:#EEF0F8;
+    --project-tint2:#DEE2F1;
+
+    --gold:#CE9B3C;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--unico-tint2);}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    background:var(--project-deep);
+    color:#F4F3EE;
+    padding:52px 6vw 34px;
+    overflow:hidden;
+    border-bottom:6px solid var(--unico);
+  }
+  .hero::before{
+    content:"";
+    position:absolute; inset:0;
+    background:
+      radial-gradient(circle at 14% 22%, rgba(234,74,34,.35), transparent 42%),
+      radial-gradient(circle at 88% 0%, rgba(234,74,34,.18), transparent 40%),
+      repeating-linear-gradient(115deg, rgba(255,255,255,.035) 0 2px, transparent 2px 34px);
+    pointer-events:none;
+  }
+  .hero-inner{position:relative; z-index:1;}
+  .eyebrow-top{
+    font-family:'Space Mono',monospace;
+    font-size:12.5px; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--unico-tint2); opacity:.9; margin:0 0 10px;
+  }
+  .hero h1{
+    font-family:'Anton',sans-serif;
+    font-weight:400;
+    font-size:clamp(38px,6.4vw,74px);
+    line-height:.94;
+    letter-spacing:.01em;
+    margin:0 0 6px;
+    text-transform:uppercase;
+  }
+  .hero h1 span{color:var(--unico);}
+  .hero-sub{
+    font-size:clamp(14px,1.8vw,17px);
+    color:#D7D7E0;
+    max-width:640px;
+    margin:10px 0 26px;
+    line-height:1.5;
+  }
+  .factstrip{
+    display:flex; flex-wrap:wrap; gap:10px 26px;
+    font-family:'Space Mono',monospace;
+    font-size:12px; letter-spacing:.02em;
+    color:#CFCFE0;
+    border-top:1px solid rgba(255,255,255,.15);
+    border-bottom:1px solid rgba(255,255,255,.15);
+    padding:14px 0; margin-bottom:22px;
+  }
+  .factstrip b{color:#fff; font-weight:700;}
+
+  .legend-row{
+    display:flex; flex-wrap:wrap; align-items:center; gap:22px 30px;
+  }
+  .legend-item{display:flex; align-items:center; gap:9px; font-size:13.5px; color:#EDEDF3;}
+  .dot{width:11px; height:11px; border-radius:3px; display:inline-block; flex:none;}
+  .dot.unico-dot{background:var(--unico);}
+  .dot.project-dot{background:#8B93C4;}
+
+  .filters{display:flex; gap:8px; margin-left:auto;}
+  .filter-btn{
+    font-family:'Space Mono',monospace;
+    font-size:11.5px; letter-spacing:.06em; text-transform:uppercase;
+    background:transparent; color:#D7D7E0;
+    border:1px solid rgba(255,255,255,.3);
+    border-radius:20px; padding:7px 14px; cursor:pointer;
+    transition:background .15s, color .15s, border-color .15s;
+  }
+  .filter-btn:hover{border-color:#fff; color:#fff;}
+  .filter-btn.active{background:var(--unico); border-color:var(--unico); color:#fff;}
+
+  /* ---------- PHASE 0 NOTE ---------- */
+  .phase0{
+    max-width:1400px; margin:0 auto; padding:20px 6vw 0;
+  }
+  .phase0 p{
+    font-size:13.5px; color:var(--ink-soft);
+    background:var(--paper); border:1px dashed var(--line);
+    border-radius:10px; padding:12px 16px; margin:18px 0 0;
+  }
+  .phase0 p b{color:var(--ink);}
+
+  /* ---------- TABLE WRAP ---------- */
+  .table-wrap{
+    max-width:1400px; margin:22px auto 0; padding:0 6vw 10px;
+    overflow-x:auto;
+  }
+  table{
+    border-collapse:separate; border-spacing:0 10px;
+    width:100%; min-width:900px;
+  }
+  thead th{
+    text-align:left; font-family:'Space Mono',monospace;
+    font-size:11.5px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--ink-soft); font-weight:700;
+    padding:0 14px 6px;
+    position:sticky; top:0; background:var(--bg); z-index:5;
+  }
+  thead th .dot{margin-right:7px; vertical-align:-1px;}
+  col.col-fecha{width:108px;}
+  col.col-unico{width:auto;}
+  col.col-project{width:340px;}
+
+  tr.day-row{background:transparent;}
+  td{
+    vertical-align:top;
+    padding:10px 12px;
+    background:var(--paper);
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+  }
+  td.col-fecha{
+    border-left:1px solid var(--line);
+    border-radius:10px 0 0 10px;
+    text-align:center;
+    position:relative;
+  }
+  td.col-fecha::after{
+    content:"";
+    position:absolute; right:0; top:8px; bottom:8px;
+    border-right:2px dashed var(--line);
+  }
+  td.col-unico{border-left:none;}
+  td.col-project{
+    border-right:1px solid var(--line);
+    border-radius:0 10px 10px 0;
+    background:var(--project-tint);
+  }
+
+  tr.key-day td.col-fecha{background:linear-gradient(180deg, var(--unico-tint) 0%, var(--paper) 78%);}
+  tr.event-day td{background:var(--project-deep) !important; color:#F4F3EE; border-color:#000;}
+  tr.event-day .post-card{background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.18);}
+  tr.event-day .post-title{color:#fff;}
+  tr.event-day .post-desc{color:#D7D7E0;}
+  tr.event-day .eyebrow{color:var(--unico-tint2);}
+  tr.event-day .gap-note{color:#D7D7E0;}
+  tr.event-day .date-countdown{color:var(--unico-tint2); font-weight:700;}
+
+  .date-wd{font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.08em; color:var(--ink-faint);}
+  .date-num{font-family:'Anton',sans-serif; font-size:30px; line-height:1; margin-top:2px;}
+  .date-mon{font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.1em; color:var(--ink-soft); margin-top:2px;}
+  .date-countdown{font-family:'Space Mono',monospace; font-size:9.5px; color:var(--unico-deep); margin-top:6px; letter-spacing:.02em;}
+  .star{color:var(--gold);}
+
+  /* ---------- ÚNICO post cards ---------- */
+  .post-card{
+    background:var(--unico-tint);
+    border:1px solid var(--unico-tint2);
+    border-left:3px solid var(--unico);
+    border-radius:8px;
+    padding:9px 11px;
+    margin-bottom:8px;
+  }
+  .post-card:last-child{margin-bottom:0;}
+  .post-top{display:flex; align-items:baseline; justify-content:space-between; gap:8px;}
+  .eyebrow{
+    font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.07em;
+    text-transform:uppercase; color:var(--unico-deep); font-weight:700;
+  }
+  .time-tag{
+    font-family:'Space Mono',monospace; font-size:9.5px; color:var(--ink-faint);
+    text-transform:uppercase;
+  }
+  .post-title{font-weight:700; font-size:14px; margin:3px 0 4px; color:var(--ink);}
+  .post-meta{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:5px;}
+  .fmt-badge{
+    font-size:10.5px; background:#fff; border:1px solid var(--unico-tint2);
+    color:var(--unico-deep); padding:2px 7px; border-radius:20px; font-weight:600;
+  }
+  .post-num{font-family:'Space Mono',monospace; font-size:10px; color:var(--ink-faint);}
+  .post-desc{font-size:12.5px; line-height:1.45; color:var(--ink-soft); margin:0;}
+
+  .rest-note{
+    font-size:12.5px; font-style:italic; color:var(--ink-faint);
+    padding:10px 4px;
+  }
+  .empty-note{
+    font-size:12px; color:var(--ink-faint); padding:14px 4px; text-align:center;
+  }
+
+  /* ---------- Project phase card ---------- */
+  .phase-card{padding:2px 2px 0;}
+  .phase-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;}
+  .phase-code{
+    font-family:'Space Mono',monospace; font-weight:700; font-size:12px;
+    letter-spacing:.05em; color:var(--project);
+    background:var(--project-tint2); padding:2px 8px; border-radius:5px;
+  }
+  .phase-range{font-family:'Space Mono',monospace; font-size:10.5px; color:var(--ink-faint);}
+  .phase-name{font-family:'Anton',sans-serif; font-size:17px; color:var(--project-deep); margin:5px 0 6px; letter-spacing:.01em;}
+  .phase-canal, .phase-obj{font-size:12px; color:var(--ink-soft); line-height:1.5; margin:2px 0;}
+  .phase-canal strong, .phase-obj strong{color:var(--ink);}
+  .phase-msg{
+    margin:8px 0 0; padding:7px 10px;
+    border-left:3px solid var(--project);
+    background:rgba(255,255,255,.6);
+    font-size:12.5px; font-style:italic; color:var(--ink);
+    border-radius:0 6px 6px 0;
+  }
+  .phase-extra{font-size:11.5px; color:var(--ink-soft); margin-top:8px; padding-top:8px; border-top:1px dashed var(--project-tint2); line-height:1.5;}
+  .gap-note{font-size:12px; color:var(--ink-soft); font-style:italic; padding:6px 2px;}
+
+  /* ---------- column filtering ---------- */
+  table.filter-unico colgroup col.col-project{visibility:collapse;}
+  table.filter-unico thead th.th-project{display:none;}
+  table.filter-project colgroup col.col-unico{visibility:collapse;}
+  table.filter-project thead th.th-unico{display:none;}
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    max-width:1400px; margin:26px auto 60px; padding:0 6vw;
+  }
+  .foot-note{
+    background:var(--paper); border:1px solid var(--line); border-radius:12px;
+    padding:16px 20px; font-size:13px; color:var(--ink-soft); line-height:1.6;
+    display:flex; gap:12px; align-items:flex-start;
+  }
+  .foot-note b{color:var(--ink);}
+  .foot-note .tag{
+    flex:none; font-family:'Space Mono',monospace; font-size:10.5px; text-transform:uppercase;
+    background:var(--gold); color:#3A2C05; padding:3px 9px; border-radius:20px; font-weight:700;
+  }
+
+  @media (max-width:720px){
+    .hero{padding:38px 5vw 26px;}
+    .filters{margin-left:0; width:100%;}
+    col.col-fecha{width:88px;}
+    col.col-project{width:280px;}
+    .date-num{font-size:24px;}
+    table{min-width:760px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <p class="eyebrow-top">Calendario conjunto de contenidos · 13 ago – 11 sept 2026</p>
+    <h1>Make it <span>ÚNICO</span></h1>
+    <p class="hero-sub">Apertura Universitaria — Expo Zaragoza. Qué se publica cada día, en qué cuenta y con qué mensaje: la cuenta oficial de ÚNICO y el canal de difusión de Project University, en una sola vista.</p>
+    <div class="factstrip">
+      <span>📅 Evento: <b>viernes 11 sept</b></span>
+      <span>🎟️ Aforo objetivo: <b>6.000</b> (ampliable a 8.000)</span>
+      <span>💶 Precio: <b>12€–25€</b> (media ≈20€)</span>
+      <span>🛒 Venta: <b>Forvenues</b>, apertura semana del 24 ago</span>
+      <span>🎓 Clases empiezan: <b>lunes 7 sept</b></span>
+    </div>
+    <div class="legend-row">
+      <div class="legend-item"><span class="dot unico-dot"></span>ÚNICO — cuenta oficial del festival</div>
+      <div class="legend-item"><span class="dot project-dot"></span>Project University — canal de difusión</div>
+      <div class="filters">
+        <button class="filter-btn active" data-filter="all">Todo</button>
+        <button class="filter-btn" data-filter="unico">Solo ÚNICO</button>
+        <button class="filter-btn" data-filter="project">Solo Project</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="phase0">
+  <p><b>Antes del 13 de agosto — Fase 0, preparación silenciosa:</b> marca, diseño y grupo de preventa listos, sin publicar nada todavía en ningún canal. (Nueva calendarización: la campaña arranca el 13 de agosto.)</p>
+</div>
+
+<div class="table-wrap">
+  <table id="cal-table" class="filter-all">
+    <colgroup>
+      <col class="col-fecha"><col class="col-unico"><col class="col-project">
+    </colgroup>
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th class="th-unico"><span class="dot unico-dot"></span>ÚNICO — cuenta oficial</th>
+        <th class="th-project"><span class="dot project-dot"></span>Project University — difusión</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr class="day-row">
+        <td class="col-fecha"><div class="date-wd">JUE</div><div class="date-num">13</div><div class="date-mon">AGO</div><div class="date-countdown">faltan 29 días</div></td>
+        <td class="col-unico">
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">Identidad</span>
+                  <span class="time-tag">Mañana</span>
+                </div>
+                <div class="post-title">Logo ÚNICO</div>
+                
+                
+              </div>
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">Identidad</span>
+                  <span class="time-tag">Noche</span>
+                </div>
+                <div class="post-title">Vídeo del logo + cielo</div>
+                <div class='post-meta'><span class="fmt-badge">Vídeo</span></div>
+                
+              </div></td>
+        <td class="col-project" rowspan="5">
+              <div class="phase-card">
+                <div class="phase-head">
+                  <span class="phase-code">FASE 1A</span>
+                  <span class="phase-range">13–17 AGO</span>
+                </div>
+                <div class="phase-name">Intriga pura</div>
+                <div class="phase-canal"><strong>Canal:</strong> Project IG (historias/feed) + teaser en grupos de compraventa</div>
+                <div class="phase-obj"><strong>Objetivo:</strong> Generar curiosidad sin dar información del evento.</div>
+                <blockquote class="phase-msg">“Zaragoza es de las pocas ciudades que nunca ha tenido una apertura universitaria como se merece. Eso está a punto de cambiar.”</blockquote>
+                <p class="phase-extra">Grupos de compraventa: mismo teaser, sin enlace de compra — solo generar la pregunta.</p>
+              </div>
+            </td>
+      </tr>
+
+      <tr class="day-row">
+        <td class="col-fecha"><div class="date-wd">VIE</div><div class="date-num">14</div><div class="date-mon">AGO</div><div class="date-countdown">faltan 28 días</div></td>
+        <td class="col-unico">
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">Identidad</span>
+                  <span class="time-tag">Mañana</span>
+                </div>
+                <div class="post-title">Construcción y tamaños del logo</div>
+                
+                
+              </div>
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">Identidad</span>
+                  <span class="time-tag">Noche</span>
+                </div>
+                <div class="post-title">Torre del Agua</div>
+                
+                
+              </div></td>
+        
+      </tr>
+
+      <tr class="day-row">
+        <td class="col-fecha"><div class="date-wd">SÁB</div><div class="date-num">15</div><div class="date-mon">AGO</div><div class="date-countdown">faltan 27 días</div></td>
+        <td class="col-unico">
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">Identidad</span>
+                  <span class="time-tag">Mañana</span>
+                </div>
+                <div class="post-title">Vídeo carreras</div>
+                <div class='post-meta'><span class="fmt-badge">Vídeo</span></div>
+                
+              </div>
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">Identidad</span>
+                  <span class="time-tag">Noche</span>
+                </div>
+                <div class="post-title">Desenfocado</div>
+                
+                
+              </div></td>
+        
+      </tr>
+
+      <tr class="day-row">
+        <td class="col-fecha"><div class="date-wd">DOM</div><div class="date-num">16</div><div class="date-mon">AGO</div><div class="date-countdown">faltan 26 días</div></td>
+        <td class="col-unico">
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">Único + Zaragoza</span>
+                  
+                </div>
+                <div class="post-title">Cartelería en la calle</div>
+                
+                <p class="post-desc">ÚNICO empieza a aparecer físicamente por distintos puntos de Zaragoza.</p>
+              </div></td>
+        
+      </tr>
+
+      <tr class="day-row">
+        <td class="col-fecha"><div class="date-wd">LUN</div><div class="date-num">17</div><div class="date-mon">AGO</div><div class="date-countdown">faltan 25 días</div></td>
+        <td class="col-unico">
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">Único + Zaragoza</span>
+                  
+                </div>
+                <div class="post-title">Error 404</div>
+                <div class='post-meta'><span class="fmt-badge">Reel</span></div>
+                
+              </div></td>
+        
+      </tr>
+
+      <tr class="day-row">
+        <td class="col-fecha"><div class="date-wd">MAR</div><div class="date-num">18</div><div class="date-mon">AGO</div><div class="date-countdown">faltan 24 días</div></td>
+        <td class="col-unico">
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">Único + Zaragoza</span>
+                  
+                </div>
+                <div class="post-title">¿Qué crees que es ÚNICO?</div>
+                <div class='post-meta'><span class="fmt-badge">Entrevista calle</span></div>
+                <p class="post-desc">Entrevista en la calle.</p>
+              </div></td>
+        <td class="col-project" rowspan="2">
+              <div class="phase-card">
+                <div class="phase-head">
+                  <span class="phase-code">FASE 1B <span class="star">★</span></span>
+                  <span class="phase-range">18–19 AGO</span>
+                </div>
+                <div class="phase-name">Apertura del grupo de preventa</div>
+                <div class="phase-canal"><strong>Canal:</strong> Project IG + WhatsApp</div>
+                <div class="phase-obj"><strong>Objetivo:</strong> Llenar el grupo (tope 1.000 plazas) vía escasez explícita.</div>
+                <blockquote class="phase-msg">“Grupo lleno en 10 minutos.” / “Esto va a ser histórico.”</blockquote>
+                <p class="phase-extra">Mecánica clave: nada de explicación previa. Al abrir, escasez visible (“primeras 1.000 plazas”). El artista NO se revela todavía — se guarda para la reactivación de septiembre.</p>
+              </div>
+            </td>
+      </tr>
+
+      <tr class="day-row">
+        <td class="col-fecha"><div class="date-wd">MIÉ</div><div class="date-num">19</div><div class="date-mon">AGO</div><div class="date-countdown">faltan 23 días</div></td>
+        <td class="col-unico"><div class="rest-note">Sin publicación principal.</div></td>
+        
+      </tr>
+
+      <tr class="day-row key-day">
+        <td class="col-fecha"><div class="date-wd">JUE</div><div class="date-num">20</div><div class="date-mon">AGO <span class="star">★</span></div><div class="date-countdown">faltan 22 días</div></td>
+        <td class="col-unico">
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">Reveal</span>
+                  
+                </div>
+                <div class="post-title">Vídeo Reveal</div>
+                <div class='post-meta'><span class="fmt-badge">Vídeo</span></div>
+                
+              </div>
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">El Festival</span>
+                  
+                </div>
+                <div class="post-title">Apertura de la preventa</div>
+                
+                
+              </div></td>
+        <td class="col-project" rowspan="3">
+              <div class="phase-card">
+                <div class="phase-head">
+                  <span class="phase-code">FASE 1C</span>
+                  <span class="phase-range">20–22 AGO</span>
+                </div>
+                <div class="phase-name">Rompecabezas + residencias</div>
+                <div class="phase-canal"><strong>Canal:</strong> Grupo de preventa + residencias universitarias</div>
+                <div class="phase-obj"><strong>Objetivo:</strong> Sostener el hype sin revelar el artista; activar residencias en paralelo.</div>
+                <blockquote class="phase-msg">“4 horas de barra libre. Lo siguiente, en unos días.” / “La apertura universitaria que Zaragoza nunca ha tenido.”</blockquote>
+                
+              </div>
+            </td>
+      </tr>
+
+      <tr class="day-row">
+        <td class="col-fecha"><div class="date-wd">VIE</div><div class="date-num">21</div><div class="date-mon">AGO</div><div class="date-countdown">faltan 21 días</div></td>
+        <td class="col-unico">
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">Serie: 0 a 100</span>
+                  
+                </div>
+                <div class="post-title">Capítulo 1 — Todo empieza por una idea</div>
+                
+                
+              </div></td>
+        
+      </tr>
+
+      <tr class="day-row">
+        <td class="col-fecha"><div class="date-wd">SÁB</div><div class="date-num">22</div><div class="date-mon">AGO</div><div class="date-countdown">faltan 20 días</div></td>
+        <td class="col-unico">
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">El Festival</span>
+                  
+                </div>
+                <div class="post-title">Información del evento</div>
+                
+                
+              </div>
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">El Festival</span>
+                  
+                </div>
+                <div class="post-title">Cuenta atrás: 48h para la salida de entradas</div>
+                
+                
+              </div></td>
+        
+      </tr>
+
+      <tr class="day-row key-day">
+        <td class="col-fecha"><div class="date-wd">DOM</div><div class="date-num">23</div><div class="date-mon">AGO <span class="star">★</span></div><div class="date-countdown">faltan 19 días</div></td>
+        <td class="col-unico">
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">El Festival</span>
+                  <span class="time-tag">Mañana</span>
+                </div>
+                <div class="post-title">Salen las entradas</div>
+                
+                
+              </div></td>
+        <td class="col-project" rowspan="1">
+              <div class="phase-card">
+                <div class="phase-head">
+                  <span class="phase-code">FASE 2 <span class="star">★</span></span>
+                  <span class="phase-range">23 AGO</span>
+                </div>
+                <div class="phase-name">Preventa cerrada</div>
+                <div class="phase-canal"><strong>Canal:</strong> Grupo de preventa + residencias</div>
+                <div class="phase-obj"><strong>Objetivo:</strong> Agotar tramo 12€ y 15€, entrar en 18€.</div>
+                <blockquote class="phase-msg">“Preventa sold out en horas.”</blockquote>
+                <p class="phase-extra">Segmentos: grupo cerrado de WhatsApp (2006-07-08) + residencias contactadas directamente. Acceso exclusivo — se activa siempre, es la base fija de la preventa (no depende de nada externo).</p>
+              </div>
+            </td>
+      </tr>
+
+      <tr class="day-row">
+        <td class="col-fecha"><div class="date-wd">LUN</div><div class="date-num">24</div><div class="date-mon">AGO</div><div class="date-countdown">faltan 18 días</div></td>
+        <td class="col-unico">
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">Comunidad</span>
+                  
+                </div>
+                <div class="post-title">UGC anunciando ÚNICO</div>
+                <div class='post-meta'><span class="fmt-badge">UGC</span></div>
+                
+              </div>
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">El Festival</span>
+                  
+                </div>
+                <div class="post-title">Landing con los artistas (DJs)</div>
+                <div class='post-meta'><span class="fmt-badge">Landing</span></div>
+                <p class="post-desc">Se lanza mostrando solo la parte baja del cartel — sin desvelar el DJ nacional ni el cabeza de cartel.</p>
+              </div></td>
+        <td class="col-project" rowspan="6">
+              <div class="phase-card">
+                <div class="phase-head">
+                  <span class="phase-code">FASE 3</span>
+                  <span class="phase-range">24–29 AGO</span>
+                </div>
+                <div class="phase-name">Venta general</div>
+                <div class="phase-canal"><strong>Canal:</strong> Instagram + grupos de carrera, por oleadas</div>
+                <div class="phase-obj"><strong>Objetivo:</strong> Agotar el tramo de 18€, entrar en 22€.</div>
+                <blockquote class="phase-msg">“La preventa voló. Ahora es tu turno.” / “El mayor evento universitario de septiembre en Zaragoza, ya a la venta.”</blockquote>
+                <p class="phase-extra">Segmentos: 2006-2007 por facultades grandes primero (Medicina, Derecho, ADE, Ingenierías), resto después. Si la preventa llega a 1.200-1.500 → activación escalonada. Si se queda corta → se activan todos de golpe + se suelta ya un primer grupo de compraventa de refuerzo.</p>
+              </div>
+            </td>
+      </tr>
+
+      <tr class="day-row">
+        <td class="col-fecha"><div class="date-wd">MAR</div><div class="date-num">25</div><div class="date-mon">AGO</div><div class="date-countdown">faltan 17 días</div></td>
+        <td class="col-unico">
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">El Festival</span>
+                  
+                </div>
+                <div class="post-title">Revelamos el resto de DJs</div>
+                
+                <p class="post-desc">Excepto Barce y el artista principal (Funzo).</p>
+              </div>
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">El Festival</span>
+                  
+                </div>
+                <div class="post-title">Cuenta atrás: 48h para el DJ nacional</div>
+                
+                
+              </div></td>
+        
+      </tr>
+
+      <tr class="day-row">
+        <td class="col-fecha"><div class="date-wd">MIÉ</div><div class="date-num">26</div><div class="date-mon">AGO</div><div class="date-countdown">faltan 16 días</div></td>
+        <td class="col-unico">
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">Comunidad</span>
+                  
+                </div>
+                <div class="post-title">Recordatorio: 24h para el DJ nacional</div>
+                
+                <p class="post-desc">Caja de comentarios: “¿Quién creéis que es?”</p>
+              </div></td>
+        
+      </tr>
+
+      <tr class="day-row">
+        <td class="col-fecha"><div class="date-wd">JUE</div><div class="date-num">27</div><div class="date-mon">AGO</div><div class="date-countdown">faltan 15 días</div></td>
+        <td class="col-unico">
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">El Festival</span>
+                  
+                </div>
+                <div class="post-title">Reveal de Barce</div>
+                
+                
+              </div></td>
+        
+      </tr>
+
+      <tr class="day-row">
+        <td class="col-fecha"><div class="date-wd">VIE</div><div class="date-num">28</div><div class="date-mon">AGO</div><div class="date-countdown">faltan 14 días</div></td>
+        <td class="col-unico"><div class="rest-note">Sin post principal.</div></td>
+        
+      </tr>
+
+      <tr class="day-row">
+        <td class="col-fecha"><div class="date-wd">SÁB</div><div class="date-num">29</div><div class="date-mon">AGO</div><div class="date-countdown">faltan 13 días</div></td>
+        <td class="col-unico">
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">El Festival</span>
+                  
+                </div>
+                <div class="post-title">Teaser de Funzo</div>
+                <div class='post-meta'><span class="fmt-badge">Entrevista calle</span></div>
+                <p class="post-desc">Entrevistas en la calle mostrando las reacciones.</p>
+              </div></td>
+        
+      </tr>
+
+      <tr class="day-row key-day">
+        <td class="col-fecha"><div class="date-wd">DOM</div><div class="date-num">30</div><div class="date-mon">AGO <span class="star">★</span></div><div class="date-countdown">faltan 12 días</div></td>
+        <td class="col-unico">
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">El Festival</span>
+                  
+                </div>
+                <div class="post-title">Anuncio oficial de Funzo</div>
+                
+                
+              </div>
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">El Festival</span>
+                  
+                </div>
+                <div class="post-title">Publicación del cartel completo</div>
+                
+                
+              </div></td>
+        <td class="col-project" rowspan="5">
+              <div class="phase-card">
+                <div class="phase-head">
+                  <span class="phase-code">FASE 4 <span class="star">★</span></span>
+                  <span class="phase-range">30 AGO – 3 SEP</span>
+                </div>
+                <div class="phase-name">Reactivación con artista</div>
+                <div class="phase-canal"><strong>Canal:</strong> Grupos de compraventa (7) + paid ads</div>
+                <div class="phase-obj"><strong>Objetivo:</strong> Reactivar la venta y agotar el tramo de 22€.</div>
+                <blockquote class="phase-msg">“Ya podemos decirlo: [artista] estará el 11 de septiembre.” / “Va a venir hasta mi abuela.”</blockquote>
+                <p class="phase-extra">⚡ El artista ya está revelado en la cuenta ÚNICO (Barce el 27 ago, Funzo el 30 ago) — usar esos nombres al activar esta fase. Segmentos: 2008 (nuevo ingreso) + los 7 grupos de compraventa. Se sueltan 2-3 grupos si la venta general fue bien; los 7 de golpe si fue floja.</p>
+              </div>
+            </td>
+      </tr>
+
+      <tr class="day-row">
+        <td class="col-fecha"><div class="date-wd">LUN</div><div class="date-num">31</div><div class="date-mon">AGO</div><div class="date-countdown">faltan 11 días</div></td>
+        <td class="col-unico">
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">Comunidad</span>
+                  
+                </div>
+                <div class="post-title">Ya somos más de X…</div>
+                
+                
+              </div></td>
+        
+      </tr>
+
+      <tr class="day-row">
+        <td class="col-fecha"><div class="date-wd">MAR</div><div class="date-num">1</div><div class="date-mon">SEP</div><div class="date-countdown">faltan 10 días</div></td>
+        <td class="col-unico">
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">Serie: 0 a 100</span>
+                  
+                </div>
+                <div class="post-title">Capítulo 2 — Construyendo ÚNICO</div>
+                
+                
+              </div></td>
+        
+      </tr>
+
+      <tr class="day-row">
+        <td class="col-fecha"><div class="date-wd">MIÉ</div><div class="date-num">2</div><div class="date-mon">SEP</div><div class="date-countdown">faltan 9 días</div></td>
+        <td class="col-unico">
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">Info útil</span>
+                  
+                </div>
+                <div class="post-title">Preguntas y respuestas (FAQ)</div>
+                
+                
+              </div></td>
+        
+      </tr>
+
+      <tr class="day-row">
+        <td class="col-fecha"><div class="date-wd">JUE</div><div class="date-num">3</div><div class="date-mon">SEP</div><div class="date-countdown">faltan 8 días</div></td>
+        <td class="col-unico">
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">Comunidad</span>
+                  
+                </div>
+                <div class="post-title">¿Qué canción no puede faltar de Funzo?</div>
+                <div class='post-meta'><span class="fmt-badge">Entrevista calle</span></div>
+                <p class="post-desc">Entrevista.</p>
+              </div>
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">Comunidad</span>
+                  
+                </div>
+                <div class="post-title">Cambio de tramo</div>
+                
+                <p class="post-desc">Dependiendo de cómo vaya la venta.</p>
+              </div></td>
+        
+      </tr>
+
+      <tr class="day-row">
+        <td class="col-fecha"><div class="date-wd">VIE</div><div class="date-num">4</div><div class="date-mon">SEP</div><div class="date-countdown">faltan 7 días</div></td>
+        <td class="col-unico">
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">Recta final</span>
+                  
+                </div>
+                <div class="post-title">Cuenta atrás: 7 días</div>
+                
+                
+              </div></td>
+        <td class="col-project" rowspan="8">
+              <div class="phase-card">
+                <div class="phase-head">
+                  <span class="phase-code">FASE 5</span>
+                  <span class="phase-range">4–11 SEP</span>
+                </div>
+                <div class="phase-name">Última semana</div>
+                <div class="phase-canal"><strong>Canal:</strong> Recordatorios breves y espaciados</div>
+                <div class="phase-obj"><strong>Objetivo:</strong> Cerrar aforo sin saturar (ya en clase).</div>
+                <blockquote class="phase-msg">“Última semana, si te quedas fuera de esto, no deberías llamarte universitario.”</blockquote>
+                <p class="phase-extra">Solo se lanza si el aforo no está ya cerca de agotarse. Si se ha vendido +90%, no se toca nada, para no dar sensación de desesperación.</p>
+              </div>
+            </td>
+      </tr>
+
+      <tr class="day-row">
+        <td class="col-fecha"><div class="date-wd">SÁB</div><div class="date-num">5</div><div class="date-mon">SEP</div><div class="date-countdown">faltan 6 días</div></td>
+        <td class="col-unico">
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">Info útil</span>
+                  
+                </div>
+                <div class="post-title">Kit de supervivencia ÚNICO</div>
+                
+                
+              </div></td>
+        
+      </tr>
+
+      <tr class="day-row">
+        <td class="col-fecha"><div class="date-wd">DOM</div><div class="date-num">6</div><div class="date-mon">SEP</div><div class="date-countdown">faltan 5 días</div></td>
+        <td class="col-unico">
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">Info útil</span>
+                  
+                </div>
+                <div class="post-title">Horarios</div>
+                
+                
+              </div>
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">Info útil</span>
+                  
+                </div>
+                <div class="post-title">Line-up</div>
+                
+                
+              </div></td>
+        
+      </tr>
+
+      <tr class="day-row">
+        <td class="col-fecha"><div class="date-wd">LUN</div><div class="date-num">7</div><div class="date-mon">SEP</div><div class="date-countdown">faltan 4 días</div></td>
+        <td class="col-unico">
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">El Festival</span>
+                  
+                </div>
+                <div class="post-title">Mapa del recinto</div>
+                
+                
+              </div></td>
+        
+      </tr>
+
+      <tr class="day-row">
+        <td class="col-fecha"><div class="date-wd">MAR</div><div class="date-num">8</div><div class="date-mon">SEP</div><div class="date-countdown">faltan 3 días</div></td>
+        <td class="col-unico">
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">Recta final</span>
+                  
+                </div>
+                <div class="post-title">Cuenta atrás: 3 días</div>
+                
+                
+              </div></td>
+        
+      </tr>
+
+      <tr class="day-row">
+        <td class="col-fecha"><div class="date-wd">MIÉ</div><div class="date-num">9</div><div class="date-mon">SEP</div><div class="date-countdown">faltan 2 días</div></td>
+        <td class="col-unico">
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">Recta final</span>
+                  
+                </div>
+                <div class="post-title">Dump del montaje</div>
+                <div class='post-meta'><span class="fmt-badge">Carrusel dump</span></div>
+                
+              </div></td>
+        
+      </tr>
+
+      <tr class="day-row">
+        <td class="col-fecha"><div class="date-wd">JUE</div><div class="date-num">10</div><div class="date-mon">SEP</div><div class="date-countdown">falta 1 día</div></td>
+        <td class="col-unico">
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">Serie: 0 a 100</span>
+                  
+                </div>
+                <div class="post-title">Capítulo 3 — Del render a la realidad</div>
+                
+                
+              </div>
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">Recta final</span>
+                  
+                </div>
+                <div class="post-title">Cuenta atrás final</div>
+                
+                
+              </div></td>
+        
+      </tr>
+
+      <tr class="day-row key-day event-day">
+        <td class="col-fecha"><div class="date-wd">VIE</div><div class="date-num">11</div><div class="date-mon">SEP <span class="star">★</span></div><div class="date-countdown">¡HOY!</div></td>
+        <td class="col-unico">
+              <div class="post-card">
+                <div class="post-top">
+                  <span class="eyebrow">Recta final</span>
+                  <span class="time-tag">Mañana</span>
+                </div>
+                <div class="post-title">Lo único que falta eres tú</div>
+                
+                
+              </div></td>
+        
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<footer>
+  <div class="foot-note">
+    <span class="tag">Reserva</span>
+    <div><b>Paid media (Meta Ads / TikTok Ads):</b> presupuesto de reserva sin activar durante toda la campaña — palanca lista para reforzar cualquier fase de Project University si algún segmento no responde como se espera. Importante planificar en oleadas controladas por si algún tramo se frena a mediados de agosto (periodo vacacional, menor atención a los grupos).</div>
+  </div>
+</footer>
+
+<script>
+  const table = document.getElementById('cal-table');
+  document.querySelectorAll('.filter-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const f = btn.dataset.filter;
+      table.classList.remove('filter-all','filter-unico','filter-project');
+      table.classList.add('filter-' + f);
+    });
+  });
+</script>
+
+</body>
+</html>
